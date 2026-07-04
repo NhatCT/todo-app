@@ -1,119 +1,115 @@
-# 📝 Todo List Application
+# Todo List Application
 
-Ứng dụng **Quản lý công việc (Todo List)** - Bài test Intern Developer.
+Todo List - Intern Developer Test.
 
-## 🛠 Công nghệ sử dụng
+## Tech Stack
 
 ### Backend
-- **Java 17** + **Spring Boot 3.2.5**
-- **Spring Data JPA** (Hibernate)
-- **MySQL 8.0**
-- **Bean Validation** (Jakarta Validation)
-- **Maven**
+- Java 17 + Spring Boot 3.2.5
+- Spring Data JPA (Hibernate)
+- MySQL 8.0
+- Bean Validation (Jakarta Validation)
+- Maven
 
-### Frontend (Ngày 2)
-- **Next.js** + **TypeScript**
-- **Axios**
-- **Tailwind CSS**
+### Frontend (Day 2)
+- Next.js + TypeScript
+- Axios
+- Tailwind CSS
 
 ---
 
-## 📂 Cấu trúc dự án
+## Project Structure
 
 ```
 todo-app/
-├── backend/                    # Spring Boot Backend
+├── backend/
 │   ├── src/main/java/com/todo/
-│   │   ├── controller/        # REST Controllers
-│   │   ├── dto/               # Request/Response DTOs
-│   │   ├── exception/         # Exception Handler
-│   │   ├── model/             # JPA Entity
-│   │   ├── repository/        # JPA Repository
-│   │   └── service/           # Business Logic
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── exception/
+│   │   ├── model/
+│   │   ├── repository/
+│   │   └── service/
 │   ├── src/main/resources/
-│   │   └── application.yml    # Cấu hình
+│   │   └── application.yml
 │   └── pom.xml
-├── docker-compose.yml         # Docker Compose (MySQL)
+├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-## 🚀 Hướng dẫn chạy Backend
+## How to Run Backend
 
-### Yêu cầu
-- **Java 17+**
-- **Maven 3.8+**
-- **MySQL 8.0** (hoặc Docker)
+### Prerequisites
+- Java 17+
+- Maven 3.8+
+- MySQL 8.0 (or Docker)
 
-### Cách 1: Chạy với MySQL Local
+### Option 1: MySQL Local
 
 ```bash
-# 1. Tạo database
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS todo_db; CREATE USER IF NOT EXISTS 'todo_user'@'localhost' IDENTIFIED BY 'todo_pass123'; GRANT ALL PRIVILEGES ON todo_db.* TO 'todo_user'@'localhost'; FLUSH PRIVILEGES;"
 
-# 2. Build & Run
 cd backend
 mvn clean install -DskipTests
 java -jar target/todo-backend-1.0.0.jar
 ```
 
-### Cách 2: Chạy với Docker Compose
+### Option 2: Docker Compose
 
 ```bash
-# 1. Start MySQL
 docker-compose up -d
 
-# 2. Build & Run
 cd backend
 mvn clean install -DskipTests
 java -jar target/todo-backend-1.0.0.jar
 ```
 
-Backend sẽ chạy tại: **http://localhost:8080**
+Server runs at: **http://localhost:8080**
 
 ---
 
-## 📋 API Endpoints
+## API Endpoints
 
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| `GET` | `/api/todos` | Lấy danh sách công việc |
-| `GET` | `/api/todos?search=keyword` | Tìm kiếm theo tiêu đề |
-| `GET` | `/api/todos?completed=true` | Lọc theo trạng thái |
-| `GET` | `/api/todos/{id}` | Lấy chi tiết công việc |
-| `POST` | `/api/todos` | Thêm công việc mới |
-| `PUT` | `/api/todos/{id}` | Cập nhật công việc |
-| `PATCH` | `/api/todos/{id}/toggle` | Đánh dấu hoàn thành/chưa |
-| `DELETE` | `/api/todos/{id}` | Xóa công việc |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/todos | Get all todos |
+| GET | /api/todos?search=keyword | Search by title |
+| GET | /api/todos?completed=true | Filter by status |
+| GET | /api/todos/{id} | Get todo by id |
+| POST | /api/todos | Create todo |
+| PUT | /api/todos/{id} | Update todo |
+| PATCH | /api/todos/{id}/toggle | Toggle completed |
+| DELETE | /api/todos/{id} | Delete todo |
 
 ### Request Body (POST/PUT)
 
 ```json
 {
-  "title": "Học Spring Boot",
-  "description": "Hoàn thành todo app",
+  "title": "Learn Spring Boot",
+  "description": "Complete todo app",
   "completed": false
 }
 ```
 
-### Response Mẫu
+### Success Response
 
 ```json
 {
   "id": 1,
-  "title": "Học Spring Boot",
-  "description": "Hoàn thành todo app",
+  "title": "Learn Spring Boot",
+  "description": "Complete todo app",
   "completed": false,
   "createdAt": "2026-07-05T02:14:33.682958",
   "updatedAt": "2026-07-05T02:14:33.682958"
 }
 ```
 
-### Error Response
+### Error Responses
 
 ```json
-// Validation Error (400)
+// 400 Validation Error
 {
   "timestamp": "2026-07-05T02:15:29.462",
   "status": 400,
@@ -124,7 +120,7 @@ Backend sẽ chạy tại: **http://localhost:8080**
   }
 }
 
-// Not Found (404)
+// 404 Not Found
 {
   "timestamp": "2026-07-05T02:15:29.462",
   "status": 404,
@@ -135,35 +131,31 @@ Backend sẽ chạy tại: **http://localhost:8080**
 
 ---
 
-## 🧪 Kiểm thử API với Postman
-
-Import collection: [Todo App Postman Collection](postman/todo-app.postman_collection.json)
-
-Hoặc dùng curl:
+## Test with Curl
 
 ```bash
-# Lấy danh sách
+# List all
 curl http://localhost:8080/api/todos
 
-# Thêm mới
+# Create
 curl -X POST http://localhost:8080/api/todos \
   -H "Content-Type: application/json" \
-  -d '{"title":"Học Spring Boot","description":"Hoàn thành todo app"}'
+  -d '{"title":"Learn Spring Boot","description":"Complete todo app"}'
 
-# Cập nhật
+# Update
 curl -X PUT http://localhost:8080/api/todos/1 \
   -H "Content-Type: application/json" \
-  -d '{"title":"Học Spring Boot","description":"Đã xong","completed":true}'
+  -d '{"title":"Learn Spring Boot","description":"Done","completed":true}'
 
-# Xóa
+# Delete
 curl -X DELETE http://localhost:8080/api/todos/1
 ```
 
 ---
 
-## 📦 Cấu hình
+## Configuration
 
-File `backend/src/main/resources/application.yml`:
+File: `backend/src/main/resources/application.yml`
 
 ```yaml
 server:
@@ -182,21 +174,21 @@ spring:
 
 ---
 
-## ✅ Kế hoạch thực hiện
+## Progress
 
-### Ngày 1 - Backend ✅
-- [x] Khởi tạo Spring Boot + MySQL
-- [x] Thiết kế Database, Entity, Repository
+### Day 1 - Backend (Completed)
+- [x] Spring Boot project setup
+- [x] Entity, Repository, JPA
 - [x] Service + DTO + CRUD API
-- [x] Validation + Global Exception Handler
+- [x] Validation + Exception Handler
 - [x] Search + Filter API
-- [x] Kiểm thử API
+- [x] API testing
 
-### Ngày 2 - Frontend
-- [ ] Khởi tạo Next.js + TypeScript + Tailwind CSS
-- [ ] Hiển thị danh sách Todo
-- [ ] Thêm, sửa, xóa Todo
-- [ ] Đánh dấu hoàn thành
+### Day 2 - Frontend (Pending)
+- [ ] Next.js + TypeScript + Tailwind CSS
+- [ ] Todo list display
+- [ ] Create, edit, delete
+- [ ] Toggle completed
 - [ ] Search + Filter
-- [ ] Responsive, Loading, Empty State, Confirm Delete
-- [ ] README hoàn chỉnh + Push GitHub
+- [ ] Responsive UI
+- [ ] README + GitHub push
