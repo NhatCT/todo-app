@@ -11,7 +11,7 @@ Todo List - Intern Developer Test.
 - Bean Validation (Jakarta Validation)
 - Maven
 
-### Frontend (Day 2)
+### Frontend
 - Next.js + TypeScript
 - Axios
 - Tailwind CSS
@@ -39,7 +39,7 @@ todo-app/
 
 ---
 
-## How to Run Backend
+## How to Run
 
 ### Prerequisites
 - Java 17+
@@ -131,28 +131,6 @@ Server runs at: **http://localhost:8080**
 
 ---
 
-## Test with Curl
-
-```bash
-# List all
-curl http://localhost:8080/api/todos
-
-# Create
-curl -X POST http://localhost:8080/api/todos \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Learn Spring Boot","description":"Complete todo app"}'
-
-# Update
-curl -X PUT http://localhost:8080/api/todos/1 \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Learn Spring Boot","description":"Done","completed":true}'
-
-# Delete
-curl -X DELETE http://localhost:8080/api/todos/1
-```
-
----
-
 ## Configuration
 
 File: `backend/src/main/resources/application.yml`
@@ -170,25 +148,3 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-```
-
----
-
-## Progress
-
-### Day 1 - Backend (Completed)
-- [x] Spring Boot project setup
-- [x] Entity, Repository, JPA
-- [x] Service + DTO + CRUD API
-- [x] Validation + Exception Handler
-- [x] Search + Filter API
-- [x] API testing
-
-### Day 2 - Frontend (Pending)
-- [ ] Next.js + TypeScript + Tailwind CSS
-- [ ] Todo list display
-- [ ] Create, edit, delete
-- [ ] Toggle completed
-- [ ] Search + Filter
-- [ ] Responsive UI
-- [ ] README + GitHub push
