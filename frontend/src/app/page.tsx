@@ -6,6 +6,7 @@ import { todoService } from '../services/api';
 import { TodoCard } from '../components/TodoCard';
 import { TodoModal } from '../components/TodoModal';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { FilterBar } from '../components/FilterBar';
 
 export default function Dashboard() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -18,11 +19,24 @@ export default function Dashboard() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [todoToDelete, setTodoToDelete] = useState<number | undefined>(undefined);
 
+  // Search & Filter state
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [completedFilter, setCompletedFilter] = useState<boolean | undefined>(undefined);
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [search]);
+
   const fetchTodos = useCallback(async () => {
     setIsLoading(true);
     setError('');
     try {
-      const data = await todoService.getAllTodos();
+      const data = await todoService.getAllTodos(debouncedSearch, completedFilter);
       setTodos(data);
     } catch (err: any) {
       console.error(err);
@@ -30,7 +44,7 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [debouncedSearch, completedFilter]);
 
   useEffect(() => {
     fetchTodos();
@@ -95,7 +109,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-outfit">
             Danh sách công việc
@@ -104,16 +118,16 @@ export default function Dashboard() {
             Xem, thêm mới và chỉnh sửa các công việc hàng ngày của bạn.
           </p>
         </div>
-        <button
-          onClick={handleAddTrigger}
-          className="px-5 py-3 rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/35 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center space-x-2 cursor-pointer"
-        >
-          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Thêm công việc</span>
-        </button>
       </div>
+
+      {/* Filters and Search */}
+      <FilterBar
+        search={search}
+        onSearchChange={setSearch}
+        completedFilter={completedFilter}
+        onFilterChange={setCompletedFilter}
+        onAddNew={handleAddTrigger}
+      />
 
       {error && (
         <div className="p-4 rounded-3xl bg-rose-50 border border-rose-100 text-rose-700 text-sm dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-400">
@@ -137,7 +151,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="text-center py-12 text-slate-500 border border-dashed rounded-3xl">
-          Chưa có công việc nào. Nhấn "Thêm công việc" để bắt đầu!
+          Không tìm thấy công việc nào phù hợp.
         </div>
       )}
 
