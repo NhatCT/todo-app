@@ -34,6 +34,13 @@ export default function Dashboard() {
   // Custom Toast State
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  // Floating back to top state
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const todosPerPage = 6;
+
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -49,6 +56,24 @@ export default function Dashboard() {
     }, 300);
     return () => clearTimeout(handler);
   }, [search]);
+
+  // Reset pagination when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, completedFilter]);
+
+  // Floating back to top visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch todos and compute global metrics
   const fetchTodosAndStats = useCallback(async () => {
@@ -149,11 +174,57 @@ export default function Dashboard() {
     setIsTodoModalOpen(true);
   };
 
+  // Back to top scroll handler
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // CSV report exporter
+  const handleExportCSV = () => {
+    if (todos.length === 0) {
+      addToast('Không có công việc nào để xuất.', 'info');
+      return;
+    }
+    const headers = 'ID,Tiêu đề,Mô tả,Trạng thái,Ngày tạo,Ngày cập nhật\n';
+    const csvRows = todos.map((t) => {
+      const status = t.completed ? 'Đã hoàn thành' : 'Chờ xử lý';
+      const formattedDate = new Date(t.createdAt).toLocaleString('vi-VN');
+      const formattedUpdate = new Date(t.updatedAt).toLocaleString('vi-VN');
+      
+      const titleClean = `"${t.title.replace(/"/g, '""')}"`;
+      const descClean = `"${(t.description || '').replace(/"/g, '""')}"`;
+      
+      return `${t.id},${titleClean},${descClean},"${status}","${formattedDate}","${formattedUpdate}"`;
+    });
+    
+    const csvContent = '\uFEFF' + headers + csvRows.join('\n'); // UTF-8 BOM
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `flowtodo_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    addToast('Đã tải xuống file CSV báo cáo công việc.');
+  };
+
+  // Sort & Paginate calculation
+  const sortedTodos = [...todos].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  const indexOfLastTodo = currentPage * todosPerPage;
+  const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
+  const currentTodos = sortedTodos.slice(indexOfFirstTodo, indexOfLastTodo);
+  const totalPages = Math.ceil(sortedTodos.length / todosPerPage);
+
   return (
     <div className="space-y-8">
       
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-outfit">
             Bảng điều khiển
@@ -162,6 +233,15 @@ export default function Dashboard() {
             Theo dõi, phân loại và hoàn thành mục tiêu ngày của bạn.
           </p>
         </div>
+        <button
+          onClick={handleExportCSV}
+          className="self-start sm:self-center flex items-center space-x-2 px-4.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/80 hover:shadow-sm transition-all duration-200 cursor-pointer"
+        >
+          <svg className="w-4.5 h-4.5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Xuất báo cáo CSV</span>
+        </button>
       </div>
 
       {/* Stats Bar */}
@@ -214,11 +294,10 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-      ) : todos.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...todos]
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .map((todo) => (
+      ) : currentTodos.length > 0 ? (
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentTodos.map((todo) => (
               <TodoCard
                 key={todo.id}
                 todo={todo}
@@ -227,6 +306,46 @@ export default function Dashboard() {
                 onDelete={handleDeleteTrigger}
               />
             ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-2 pt-4">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {Array.from({ length: totalPages }).map((_, idx) => (
+                <button
+                  key={idx + 1}
+                  onClick={() => setCurrentPage(idx + 1)}
+                  className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    currentPage === idx + 1
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/80'
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         /* Empty State */
@@ -276,6 +395,19 @@ export default function Dashboard() {
         confirmText="Xóa bỏ"
         cancelText="Hủy"
       />
+
+      {/* Floating Back to Top Button */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-6 p-3 rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 hover:scale-110 active:scale-95 transition-all duration-200 z-40 cursor-pointer animate-fade-in"
+          aria-label="Back to Top"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7 7 7M12 3v18" />
+          </svg>
+        </button>
+      )}
 
       {/* Toast Notification Stack */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-3 pointer-events-none">

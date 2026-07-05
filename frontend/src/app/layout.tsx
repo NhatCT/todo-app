@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
+import { ThemeToggle } from "../components/ThemeToggle";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -47,6 +48,7 @@ export default function RootLayout({
               </div>
               
               <div className="flex items-center space-x-4">
+                <ThemeToggle />
                 <a
                   href="https://github.com/NhatCT/todo-app"
                   target="_blank"
