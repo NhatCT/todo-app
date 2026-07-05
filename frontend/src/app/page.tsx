@@ -5,6 +5,7 @@ import { Todo } from '../types/todo';
 import { todoService } from '../services/api';
 import { TodoCard } from '../components/TodoCard';
 import { TodoModal } from '../components/TodoModal';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function Dashboard() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -12,6 +13,10 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState<Todo | undefined>(undefined);
+
+  // Deletion state
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [todoToDelete, setTodoToDelete] = useState<number | undefined>(undefined);
 
   const fetchTodos = useCallback(async () => {
     setIsLoading(true);
@@ -53,13 +58,29 @@ export default function Dashboard() {
   };
 
   const handleToggleTodo = async (id: number) => {
-    // Sẽ hoàn thiện ở commit sau (Task 11)
-    console.log('Toggle todo id:', id);
+    try {
+      await todoService.toggleTodo(id);
+      fetchTodos();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDeleteTrigger = (id: number) => {
-    // Sẽ hoàn thiện ở commit sau (Task 11)
-    console.log('Delete todo id:', id);
+    setTodoToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (todoToDelete === undefined) return;
+    try {
+      await todoService.deleteTodo(todoToDelete);
+      fetchTodos();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTodoToDelete(undefined);
+    }
   };
 
   const handleEditTrigger = (todo: Todo) => {
@@ -125,6 +146,16 @@ export default function Dashboard() {
         onClose={() => setIsTodoModalOpen(false)}
         onSubmit={handleModalSubmit}
         initialTodo={selectedTodo}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Xóa công việc"
+        message="Bạn có chắc chắn muốn xóa công việc này? Hành động này không thể hoàn tác."
+        confirmText="Xóa bỏ"
+        cancelText="Hủy"
       />
     </div>
   );
