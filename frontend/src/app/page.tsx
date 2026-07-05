@@ -1,65 +1,131 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect, useCallback } from 'react';
+import { Todo } from '../types/todo';
+import { todoService } from '../services/api';
+import { TodoCard } from '../components/TodoCard';
+import { TodoModal } from '../components/TodoModal';
+
+export default function Dashboard() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | undefined>(undefined);
+
+  const fetchTodos = useCallback(async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const data = await todoService.getAllTodos();
+      setTodos(data);
+    } catch (err: any) {
+      console.error(err);
+      setError('Không thể tải danh sách công việc. Vui lòng kiểm tra kết nối với API.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
+
+  const handleModalSubmit = async (data: { title: string; description: string; completed?: boolean }) => {
+    try {
+      if (selectedTodo) {
+        await todoService.updateTodo(selectedTodo.id, {
+          title: data.title,
+          description: data.description,
+          completed: data.completed,
+        });
+      } else {
+        await todoService.createTodo({
+          title: data.title,
+          description: data.description,
+          completed: false,
+        });
+      }
+      fetchTodos();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleTodo = async (id: number) => {
+    // Sẽ hoàn thiện ở commit sau (Task 11)
+    console.log('Toggle todo id:', id);
+  };
+
+  const handleDeleteTrigger = (id: number) => {
+    // Sẽ hoàn thiện ở commit sau (Task 11)
+    console.log('Delete todo id:', id);
+  };
+
+  const handleEditTrigger = (todo: Todo) => {
+    setSelectedTodo(todo);
+    setIsTodoModalOpen(true);
+  };
+
+  const handleAddTrigger = () => {
+    setSelectedTodo(undefined);
+    setIsTodoModalOpen(true);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-outfit">
+            Danh sách công việc
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Xem, thêm mới và chỉnh sửa các công việc hàng ngày của bạn.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <button
+          onClick={handleAddTrigger}
+          className="px-5 py-3 rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/35 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+        >
+          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Thêm công việc</span>
+        </button>
+      </div>
+
+      {error && (
+        <div className="p-4 rounded-3xl bg-rose-50 border border-rose-100 text-rose-700 text-sm dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-400">
+          {error}
         </div>
-      </main>
+      )}
+
+      {isLoading ? (
+        <div className="text-center py-12 text-slate-500">Đang tải...</div>
+      ) : todos.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {todos.map((todo) => (
+            <TodoCard
+              key={todo.id}
+              todo={todo}
+              onToggle={handleToggleTodo}
+              onEdit={handleEditTrigger}
+              onDelete={handleDeleteTrigger}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-slate-500 border border-dashed rounded-3xl">
+          Chưa có công việc nào. Nhấn "Thêm công việc" để bắt đầu!
+        </div>
+      )}
+
+      <TodoModal
+        isOpen={isTodoModalOpen}
+        onClose={() => setIsTodoModalOpen(false)}
+        onSubmit={handleModalSubmit}
+        initialTodo={selectedTodo}
+      />
     </div>
   );
 }
