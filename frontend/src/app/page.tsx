@@ -216,15 +216,17 @@ export default function Dashboard() {
         </div>
       ) : todos.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {todos.map((todo) => (
-            <TodoCard
-              key={todo.id}
-              todo={todo}
-              onToggle={handleToggleTodo}
-              onEdit={handleEditTrigger}
-              onDelete={handleDeleteTrigger}
-            />
-          ))}
+          {[...todos]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .map((todo) => (
+              <TodoCard
+                key={todo.id}
+                todo={todo}
+                onToggle={handleToggleTodo}
+                onEdit={handleEditTrigger}
+                onDelete={handleDeleteTrigger}
+              />
+            ))}
         </div>
       ) : (
         /* Empty State */
