@@ -216,3 +216,36 @@ On every push or pull request to the `main` and `develop` branches, the CI runne
   "updatedAt": "2026-07-06T09:40:21.000"
 }
 ```
+
+---
+
+## ☁️ Production Online Deployment Guide
+
+To deploy the entire full-stack application online in a production environment:
+
+### 1. Deploy the MySQL Database
+You can host a free MySQL database on cloud providers like **Railway**, **Render**, or **Aiven.io**.
+* Create a MySQL database instance and obtain the connection details: Host, Port, Database Name, Username, and Password.
+
+### 2. Deploy the Backend (Spring Boot REST API)
+You can deploy the Spring Boot backend to **Render** or **Railway**:
+* **Step A**: Sign up on Render/Railway and click **Create a New Web Service**.
+* **Step B**: Connect your GitHub repository.
+* **Step C**: Select **Docker** as the environment (Render will automatically build the `Dockerfile` inside the `backend/` folder!).
+* **Step D**: Set the environment variables in the dashboard:
+  * `SPRING_DATASOURCE_URL`: `jdbc:mysql://[DATABASE_HOST]:[DATABASE_PORT]/[DATABASE_NAME]?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh`
+  * `SPRING_DATASOURCE_USERNAME`: `[DATABASE_USER]`
+  * `SPRING_DATASOURCE_PASSWORD`: `[DATABASE_PASSWORD]`
+  * `TZ`: `Asia/Ho_Chi_Minh`
+* **Step E**: Click Deploy. Once active, copy your production backend service URL (e.g., `https://flowtodo-api.onrender.com`).
+
+### 3. Deploy the Frontend (Next.js) to Vercel
+* **Step A**: Sign up or log in to **Vercel** (`https://vercel.com`).
+* **Step B**: Click **Add New Project** and import your GitHub repository.
+* **Step C**: Configure the project settings:
+  * **Framework Preset**: Next.js
+  * **Root Directory**: `frontend` (Make sure to select the `frontend` subfolder!)
+* **Step D**: In the **Environment Variables** section, add:
+  * Name: `NEXT_PUBLIC_API_URL`
+  * Value: `https://[YOUR_DEPLOYED_BACKEND_URL]/api/todos` (e.g. `https://flowtodo-api.onrender.com/api/todos`)
+* **Step E**: Click **Deploy**. Vercel will compile and host your frontend client at a custom URL (e.g., `https://flowtodo.vercel.app`).
