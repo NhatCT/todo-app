@@ -46,6 +46,17 @@ jobs:
           SPRING_DATASOURCE_USERNAME: todo_user
           SPRING_DATASOURCE_PASSWORD: todo_pass123
 
+      - name: Print Test Reports on Failure
+        if: failure()
+        run: |
+          echo "=== SUREFIRE TEST REPORTS ==="
+          for file in backend/target/surefire-reports/*.txt; do
+            if [ -f "$file" ]; then
+              echo "--- $file ---"
+              cat "$file"
+            fi
+          done
+
   frontend-build:
     name: Frontend Build & Lint
     runs-on: ubuntu-latest
