@@ -12,8 +12,8 @@ export const StatsBar: React.FC<StatsBarProps> = ({ total, completed, pending })
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm dark:bg-slate-900 dark:border-slate-800/80 transition-all duration-300">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="bg-white border border-slate-200/80 rounded-3xl p-4 sm:p-6 shadow-sm dark:bg-slate-900 dark:border-slate-800/80 transition-all duration-300">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* Metric 1: Total */}
         <div className="flex items-center space-x-4">

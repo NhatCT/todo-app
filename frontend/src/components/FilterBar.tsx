@@ -37,12 +37,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </div>
 
       {/* Tabs & Create Button */}
-      <div className="flex flex-wrap items-center justify-between md:justify-end gap-4 w-full md:w-auto">
+      <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
         {/* Filter Segmented Controls */}
-        <div className="flex bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/30 dark:border-slate-800/30">
+        <div className="flex w-full sm:w-auto bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/30 dark:border-slate-800/30">
           <button
             onClick={() => onFilterChange(undefined)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
               completedFilter === undefined
                 ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
@@ -52,7 +52,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           </button>
           <button
             onClick={() => onFilterChange(false)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
               completedFilter === false
                 ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
@@ -62,7 +62,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           </button>
           <button
             onClick={() => onFilterChange(true)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
               completedFilter === true
                 ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
@@ -75,7 +75,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         {/* Create Todo Button */}
         <button
           onClick={onAddNew}
-          className="px-5 py-3 rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/35 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center space-x-2 cursor-pointer"
+          className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/35 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer"
         >
           <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
