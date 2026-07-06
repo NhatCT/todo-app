@@ -13,7 +13,7 @@ export const StatsBar: React.FC<StatsBarProps> = ({ total, completed, pending })
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm dark:bg-slate-900 dark:border-slate-800/80 transition-all duration-300">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Metric 1: Total */}
         <div className="flex items-center space-x-4">
