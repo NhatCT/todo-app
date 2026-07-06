@@ -188,10 +188,17 @@ export default function Dashboard() {
     
     // Using tab separator for robust Excel column split and UTF-16LE encoding for correct Vietnamese accents
     const headers = 'ID\tTiêu đề\tMô tả\tTrạng thái\tNgày tạo\tNgày cập nhật\r\n';
+    const formatCSVDate = (dateStr: string) => {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+
     const csvRows = todos.map((t) => {
       const status = t.completed ? 'Đã hoàn thành' : 'Chờ xử lý';
-      const formattedDate = new Date(t.createdAt).toLocaleString('vi-VN');
-      const formattedUpdate = new Date(t.updatedAt).toLocaleString('vi-VN');
+      const formattedDate = formatCSVDate(t.createdAt);
+      const formattedUpdate = formatCSVDate(t.updatedAt);
       
       // Clean tab characters in content to avoid column splitting errors
       const titleClean = t.title.replace(/\t/g, ' ');
