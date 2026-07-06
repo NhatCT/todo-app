@@ -197,7 +197,7 @@ export default function Dashboard() {
       return `${t.id},${titleClean},${descClean},"${status}","${formattedDate}","${formattedUpdate}"`;
     });
     
-    const csvContent = '\uFEFF' + headers + csvRows.join('\n'); // UTF-8 BOM
+    const csvContent = '\uFEFFsep=,\n' + headers + csvRows.join('\n'); // UTF-8 BOM with separator declaration
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
