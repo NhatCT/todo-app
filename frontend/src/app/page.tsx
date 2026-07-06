@@ -185,20 +185,40 @@ export default function Dashboard() {
       addToast('Không có công việc nào để xuất.', 'info');
       return;
     }
-    const headers = 'ID,Tiêu đề,Mô tả,Trạng thái,Ngày tạo,Ngày cập nhật\n';
+    
+    // Using tab separator for robust Excel column split and UTF-16LE encoding for correct Vietnamese accents
+    const headers = 'ID\tTiêu đề\tMô tả\tTrạng thái\tNgày tạo\tNgày cập nhật\r\n';
     const csvRows = todos.map((t) => {
       const status = t.completed ? 'Đã hoàn thành' : 'Chờ xử lý';
       const formattedDate = new Date(t.createdAt).toLocaleString('vi-VN');
       const formattedUpdate = new Date(t.updatedAt).toLocaleString('vi-VN');
       
-      const titleClean = `"${t.title.replace(/"/g, '""')}"`;
-      const descClean = `"${(t.description || '').replace(/"/g, '""')}"`;
+      // Clean tab characters in content to avoid column splitting errors
+      const titleClean = t.title.replace(/\t/g, ' ');
+      const descClean = (t.description || '').replace(/\t/g, ' ');
       
-      return `${t.id},${titleClean},${descClean},"${status}","${formattedDate}","${formattedUpdate}"`;
+      return `${t.id}\t${titleClean}\t${descClean}\t${status}\t${formattedDate}\t${formattedUpdate}`;
     });
     
-    const csvContent = '\uFEFFsep=,\n' + headers + csvRows.join('\n'); // UTF-8 BOM with separator declaration
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvContent = headers + csvRows.join('\r\n');
+    
+    // UTF-16LE BOM (Byte Order Mark: 0xFF, 0xFE)
+    const bom = new Uint8Array([0xFF, 0xFE]);
+    
+    // Convert JS UTF-16 characters (which are natively 16-bit code units) to an array of bytes
+    const charCodeArray = new Uint16Array(csvContent.length);
+    for (let i = 0; i < csvContent.length; i++) {
+      charCodeArray[i] = csvContent.charCodeAt(i);
+    }
+    
+    const charCodeBytes = new Uint8Array(charCodeArray.buffer);
+    
+    // Combine BOM and char bytes
+    const output = new Uint8Array(bom.byteLength + charCodeBytes.byteLength);
+    output.set(bom, 0);
+    output.set(charCodeBytes, bom.byteLength);
+    
+    const blob = new Blob([output], { type: 'text/csv;charset=utf-16le;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
