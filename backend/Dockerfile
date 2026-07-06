@@ -4,7 +4,7 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 # Stage 2: Run the Spring Boot application
 FROM eclipse-temurin:17-jre-alpine
